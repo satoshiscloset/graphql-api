@@ -1,0 +1,19 @@
+service: stcl-graphql-api-lambda
+provider:
+  name: aws
+  runtime: nodejs16.x
+  httpApi:
+    cors: true
+functions:
+  graphql:
+    # Make sure your file path is correct!
+    # (e.g., if your file is in the root folder use server.graphqlHandler )
+    # The format is: <FILENAME>.<HANDLER>
+    handler: src/server.graphqlHandler
+    events:
+      - httpApi:
+          path: /
+          method: POST
+      - httpApi:
+          path: /
+          method: GET

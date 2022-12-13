@@ -1,0 +1,12 @@
+{
+  "dependencies": {
+    "@apollo/client": "^3.7.1",
+    "@apollo/server": "^4.0.4",
+    "@as-integrations/aws-lambda": "^1.0.1",
+    "graphql": "^16.6.0",
+    "moment": "^2.29.4",
+    "multicoin-address-validator": "^0.5.11",
+    "node-fetch": "^3.2.10",
+    "serverless": "^3.23.0"
+  }
+}

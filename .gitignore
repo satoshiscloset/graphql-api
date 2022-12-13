@@ -1,0 +1,9 @@
+.serverless
+
+/node_modules
+yarn-error.log
+
+.env
+
+/src/server-test.js
+query-test.json

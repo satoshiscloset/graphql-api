@@ -1,0 +1,9 @@
+{
+  "httpMethod": "POST",
+  "path": "/",
+  "headers": {
+    "content-type": "application/json"
+  },
+  "requestContext": {},
+  "body": "{\"operationName\": null, \"variables\": null, \"query\": \"{ ping }\"}"
+}
