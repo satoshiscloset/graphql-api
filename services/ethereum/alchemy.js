@@ -1,7 +1,7 @@
 const { fetch, isVideo } = require('../index.js')
 
 const BASE_URL_ETH_MAINNET = `https://eth-mainnet.g.alchemy.com/v2/${process.env.ALCHEMY_ETH_API_KEY}`
-const BASE_URL_POLYGON_MAINNET = `https://polygon-mainnet.g.alchemy.com/v2/${process.env.ALCHEMY_POLYGON_API_KEY}`
+const BASE_URL_POLYGON_MAINNET = `https://polygon-mainnet.g.alchemy.com/v2/Ws6prnBBzLLLayjB1QXx2wFOO5Ct_bXE`
 
 const _makeRequest = async (path, chain) => {
   let baseUrl = BASE_URL_ETH_MAINNET
@@ -48,22 +48,46 @@ const _formatNFT = (nft) => {
   const contractAddress = contract.address
   const tokenId = BigInt(id.tokenId).toString(10)
 
+  let thumbnailImageUrl = image
+  let imageUrl = image
+  let videoUrl
+  media.forEach(m => {
+    const { format, gateway, thumbnail, raw } = m
+    if (['mp4', 'mov'].includes(format)) {
+      // found video
+      videoUrl = gateway
+    } else {
+      if (thumbnail) {
+        thumbnailImageUrl = thumbnail
+        imageUrl = gateway
+      }
+    }
+  })
+
   return {
     chain: 'eth',
-    contractAddress: contract.address,
-    tokenId: id.tokenId,
+    contractAddress,
+    tokenId,
     name,
     description,
-    imageUrl: image,
-    thumbnailImageUrl: image,
-    // videoUrl: isVideo(animation_url) ? animation_url : isVideo(image_url) ? image_url : null,
+    imageUrl,
+    thumbnailImageUrl,
+    videoUrl,
     collection: {
       marketplaceUrl: 'https://opensea.io/',
       // id: slug,
       name: openSea.collectionName,
       description: openSea.description,
       imageUrl: openSea.imageUrl,
-      externalUrl: openSea.externalUrl
+      externalUrl: openSea.externalUrl,
+      stats: {
+        marketplace: 'opensea',
+        floorPrice: openSea.floorPrice,
+        // numOwners: num_owners,
+        totalSupply: contractMetadata.totalSupply,
+        // volumeTotal: total_volume,
+        // volume24h: one_day_volume
+      }
     },
     traits: attributes,
     marketplaceUrl: `https://opensea.io/${contractAddress}/${tokenId}`,
