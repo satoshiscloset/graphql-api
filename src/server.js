@@ -2,7 +2,7 @@ const { ApolloServer } = require('@apollo/server')
 const { startServerAndCreateLambdaHandler } = require('@as-integrations/aws-lambda')
 const validator = require('multicoin-address-validator')
 
-const { VALID_CHAINS, getAssetHelper, getAssetsHelper, isNear, getWalletHelper } = require('../services')
+const { VALID_CHAINS, getAssetHelper, getAssetsHelper, getCollectionsHelper, isNear, getWalletHelper } = require('../services')
 
 const typeDefs = `#graphql
   type Query {
@@ -24,7 +24,8 @@ const typeDefs = `#graphql
     imageUrl: String
     externalUrl : String
     marketplaceUrl : String
-    stats: Stats
+    stats: Stats,
+    numOwned: Int
   }
   type Trait {
     trait_type : String
@@ -71,28 +72,32 @@ const typeDefs = `#graphql
     assets(walletAddress: String!, chain: String, collectionContractAddress: String): [NFT]
   }
   type Query {
+    collections(walletAddress: String!, chain: String): [Collection]
+  }
+  type Query {
     wallet(walletAddress: String!) : Wallet
   }
 `
+
+const _getChainToValidate = (chain) => {
+  if (chain === 'polygon') {
+    return chainToValidate = 'matic' // validator needs polygon's old name
+  }
+  return chain
+}
 
 const validateAddress = (address, chain=null) => {
   if (chain === null) {
     for (let i = 0; i < VALID_CHAINS.length; i++) {
       const chain = VALID_CHAINS[i]
-      let chainToValidate = chain
-      if (chain === 'polygon') {
-        chainToValidate = 'matic' // validator needs polygon's old name
-      }
-      return validator.validate(chainToValidate, address) && chain
+      let chainToValidate = _getChainToValidate(chain)
+      return validator.validate(address, chainToValidate) && chain
     }
   } else {
     if (chain === 'near') {
       return isNear(address)
     } else {
-      let chainToValidate = chain
-      if (chain === 'polygon') {
-        chainToValidate = 'matic' // validator needs polygon's old name
-      }
+      let chainToValidate = _getChainToValidate(chain)
       return validator.validate(address, chainToValidate) && chain
     }
   }
@@ -111,6 +116,14 @@ const getAssets = async (walletAddress, chain, collectionContractAddress) => {
   if (validatedChain) {
     const assets = await getAssetsHelper(validatedChain, walletAddress, collectionContractAddress)
     return assets
+  }
+}
+
+const getCollections = async (walletAddress, chain) => {
+  const validatedChain = validateAddress(walletAddress, chain)
+  if (validatedChain) {
+    const collections = await getCollectionsHelper(validatedChain, walletAddress)
+    return collections
   }
 }
 
@@ -133,6 +146,10 @@ const resolvers = {
     assets: async (_, {walletAddress, chain=null, collectionContractAddress=null}) => {
       const assets = await getAssets(walletAddress, chain, collectionContractAddress)
       return assets
+    },
+    collections: async(_, {walletAddress, chain=null}) => {
+      const collections = await getCollections(walletAddress, chain)
+      return collections
     },
     wallet: async(_, {walletAddress, chain=null}) => {
       const wallet = await getWalletAssets(walletAddress, chain)

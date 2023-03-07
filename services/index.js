@@ -64,6 +64,17 @@ exports.getAssetsHelper = async (chain, walletAddress, collectionContractAddress
   }
 }
 
+exports.getCollectionsHelper = async (chain, walletAddress) => {
+  switch (chain) {
+    case 'eth':
+    case 'polygon': {
+      const { getCollections } = require('./reservoir')
+      const collections = await getCollections(chain, walletAddress)
+      return collections
+    }
+  }
+}
+
 exports.getWalletHelper = async (chain, walletAddress) => {
   switch(chain) {
     case 'xtz': {

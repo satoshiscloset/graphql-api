@@ -33,7 +33,6 @@ const _parseAssets = (assets) => {
 
     if (decimals === '0') {
       // this means we've found an NFT
-      console.log(a)
       const { description, formats = [], tags, attributes = [], displayUri, artifactUri, thumbnailUri } = metadata
       let videoUrl = null
       formats.forEach(f => {

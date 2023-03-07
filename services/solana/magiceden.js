@@ -32,7 +32,6 @@ const getCollection = async (slug) => {
 }
 
 const _formatNFT = (nft, collection = null) => {
-  console.log(nft)
   const { name, image, animationUrl, mintAddress, attributes = [], externalUrl = '', properties = {} } = nft
   const { category, files } = properties
 
