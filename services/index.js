@@ -32,25 +32,35 @@ exports.VALID_CHAINS = ['eth', 'xtz', 'sol', 'near']
 exports.getAssetHelper = async (chain, contractAddress, tokenId, includeCollection) => {
   switch(chain) {
     case 'eth': {
-      const { getAsset } = require('./ethereum/opensea.js')
+      const { getAsset } = require('./ethereum/alchemy')
       const asset = await getAsset(contractAddress, tokenId)
       return asset
     }
     case 'xtz': {
-      const { getAsset } = require('./tezos/objkt.js')
+      const { getAsset } = require('./tezos/objkt')
       const asset = await getAsset(contractAddress, tokenId)
       return asset
     }
     case 'sol': {
-      const { getAsset } = require('./solana/magiceden.js')
+      const { getAsset } = require('./solana/magiceden')
       const asset = await getAsset(contractAddress, includeCollection)
       return asset
     }
     case 'near': {
-      const { getAsset } = require('./near/paras.js')
+      const { getAsset } = require('./near/paras')
       const asset = await getAsset(contractAddress, tokenId, includeCollection)
       return asset
     }
+  }
+}
+
+exports.getAssetsHelper = async (chain, walletAddress, collectionContractAddress) => {
+  switch(chain) {
+    case 'eth':
+    case 'polygon':
+      const { getAssets } = require('./ethereum/alchemy')
+      const assets = await getAssets(chain, walletAddress, collectionContractAddress)
+      return assets
   }
 }
 
