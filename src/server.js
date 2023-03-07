@@ -75,59 +75,50 @@ const typeDefs = `#graphql
   }
 `
 
-const validateAddress = (chain, address) => {
-  if (chain === 'near') {
-    return isNear(address)
-  } else {
-    if (chain === 'polygon') {
-      chain = 'matic' // validator still works off of polygon's old name
+const validateAddress = (address, chain=null) => {
+  if (chain === null) {
+    for (let i = 0; i < VALID_CHAINS.length; i++) {
+      const chain = VALID_CHAINS[i]
+      let chainToValidate = chain
+      if (chain === 'polygon') {
+        chainToValidate = 'matic' // validator needs polygon's old name
+      }
+      return validator.validate(chainToValidate, address) && chain
     }
-    return validator.validate(address, chain)
+  } else {
+    if (chain === 'near') {
+      return isNear(address)
+    } else {
+      let chainToValidate = chain
+      if (chain === 'polygon') {
+        chainToValidate = 'matic' // validator needs polygon's old name
+      }
+      return validator.validate(address, chainToValidate) && chain
+    }
   }
 }
 
 const getAsset = async (contractAddress, tokenId, chain, includeCollection) => {
-  if (chain) {
-    if (validateAddress(chain, contractAddress)) {
-      const asset = await getAssetHelper(chain, contractAddress, tokenId, includeCollection)
-      return asset
-      // throw new UserInputError("getAsset with chain not yet implemented. Exclude 'chain' argument for now.")
-    }
-  } else {
-    for (let i = 0; i < VALID_CHAINS.length; i++) {
-      const chain = VALID_CHAINS[i]
-      if (validateAddress(chain, contractAddress)) {
-        const asset = await getAssetHelper(chain, contractAddress, tokenId, includeCollection)
-        return asset
-      }
-    }
+  const validatedChain = validateAddress(contractAddress, chain)
+  if (validatedChain) {
+    const asset = await getAssetHelper(validatedChain, contractAddress, tokenId, includeCollection)
+    return asset
   }
 }
 
 const getAssets = async (walletAddress, chain, collectionContractAddress) => {
-  if (chain) {
-    if (validateAddress(chain, walletAddress)) {
-      const assets = await getAssetsHelper(chain, walletAddress, collectionContractAddress)
-      return assets
-    }
-  } else {
-    for (let i = 0; i < VALID_CHAINS.length; i++) {
-      const chain = VALID_CHAINS[i]
-      if (validateAddress(chain, walletAddress)) {
-        const assets = await getAssetsHelper(chain, walletAddress, collectionContractAddress)
-        return assets
-      }
-    }
+  const validatedChain = validateAddress(walletAddress, chain)
+  if (validatedChain) {
+    const assets = await getAssetsHelper(validatedChain, walletAddress, collectionContractAddress)
+    return assets
   }
 }
 
-const getWalletAssets = async (walletAddress) => {
-  for (let i = 0; i < VALID_CHAINS.length; i++) {
-    const chain = VALID_CHAINS[i]
-    if (validateAddress(chain, walletAddress)) {
-      const wallet = await getWalletHelper(chain, walletAddress)
-      return wallet
-    }
+const getWalletAssets = async (walletAddress, chain) => {
+  const validatedChain = validateAddress(walletAddress, chain)
+  if (validatedChain) {
+    const wallet = await getWalletHelper(validatedChain, walletAddress)
+    return wallet
   }
 }
 
