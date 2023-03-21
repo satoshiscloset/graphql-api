@@ -73,8 +73,7 @@ exports.getAssets = async (walletAddress, contractAddress=null, offset = 0, limi
   `
   const client = getClient()
   const result = await client.query({query})
-  console.log(result)
-  return result.data.token
+  return result.data.token.map(token => _formatNFT(token))
 }
 
 exports.getAsset = async (contractAddress, tokenId) => {
