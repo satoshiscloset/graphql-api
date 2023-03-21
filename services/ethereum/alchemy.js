@@ -13,9 +13,9 @@ const _makeRequest = async (path, chain) => {
   return data
 }
 
-exports.getAsset = async (contractAddress, tokenId) => {
+exports.getAsset = async (chain, contractAddress, tokenId) => {
   const path = `getNFTMetadata?contractAddress=${contractAddress}&tokenId=${tokenId}`
-  const data = await _makeRequest(path)
+  const data = await _makeRequest(path, chain)
   if (!data) {
     return { error: 'error getting NFT data from alchemy'}
   }
@@ -50,6 +50,7 @@ const _formatNFT = (nft) => {
 
   let thumbnailImageUrl = image
   let imageUrl = image
+  let imageFormat
   let videoUrl
   media.forEach(m => {
     const { format, gateway, thumbnail, raw } = m
@@ -60,6 +61,7 @@ const _formatNFT = (nft) => {
       if (thumbnail) {
         thumbnailImageUrl = thumbnail
         imageUrl = gateway
+        imageFormat = format
       }
     }
   })
@@ -72,10 +74,11 @@ const _formatNFT = (nft) => {
     description,
     imageUrl,
     thumbnailImageUrl,
+    imageFormat,
     videoUrl,
     collection: {
       marketplaceUrl: 'https://opensea.io/',
-      // id: slug,
+      id: contractAddress,
       name: openSea.collectionName,
       description: openSea.description,
       imageUrl: openSea.imageUrl,

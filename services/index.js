@@ -33,7 +33,12 @@ exports.getAssetHelper = async (chain, contractAddress, tokenId, includeCollecti
   switch(chain) {
     case 'eth': {
       const { getAsset } = require('./ethereum/alchemy')
-      const asset = await getAsset(contractAddress, tokenId)
+      const asset = await getAsset(chain, contractAddress, tokenId)
+      return asset
+    }
+    case 'polygon': {
+      const { getAsset } = require('./reservoir')
+      const asset = await getAsset(chain, contractAddress, tokenId)
       return asset
     }
     case 'xtz': {
@@ -56,20 +61,31 @@ exports.getAssetHelper = async (chain, contractAddress, tokenId, includeCollecti
 
 exports.getAssetsHelper = async (chain, walletAddress, collectionContractAddress) => {
   switch(chain) {
-    case 'eth':
-    case 'polygon':
+    case 'eth': {
       const { getAssets } = require('./ethereum/alchemy')
       const assets = await getAssets(chain, walletAddress, collectionContractAddress)
       return assets
+    }
+    case 'polygon': {
+      // const { getAssets } = require('./reservoir')
+      const { getAssets } = require('./ethereum/alchemy')
+      const assets = await getAssets(chain, walletAddress, collectionContractAddress)
+      return assets
+    }
+    case 'xtz': {
+      const { getAssets } = require('./tezos/objkt')
+      const assets = await getAssets(walletAddress, collectionContractAddress)
+      return assets
+    }
   }
 }
 
-exports.getCollectionsHelper = async (chain, walletAddress) => {
+exports.getCollectionsHelper = async (chain, walletAddress, limit) => {
   switch (chain) {
     case 'eth':
     case 'polygon': {
       const { getCollections } = require('./reservoir')
-      const collections = await getCollections(chain, walletAddress)
+      const collections = await getCollections(chain, walletAddress, limit)
       return collections
     }
   }

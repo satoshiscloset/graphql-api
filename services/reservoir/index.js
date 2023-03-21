@@ -1,5 +1,7 @@
 const { fetch } = require('../index.js')
 
+const VERBOSE = false
+
 const BASE_URL_ETH_MAINNET = 'https://api.reservoir.tools'
 const BASE_URL_POLYGON_MAINNET = 'https://api-polygon.reservoir.tools'
 
@@ -11,6 +13,7 @@ const _makeRequest = async (path, chain) => {
     apiKey = process.env.RESERVOIR_POLYGON_API_KEY
   }
   const url = `${baseUrl}/${path}`
+  VERBOSE && console.log(url)
   const res = await fetch(url, {'x-api-key': apiKey})
   if (res.status !== 200) {
     return false
@@ -22,7 +25,7 @@ const _makeRequest = async (path, chain) => {
   return data
 }
 
-const _formatCollection = (collectionData) => {
+const _formatCollection = (collectionData, chain) => {
   const { collection: { id, slug, name, description, tokenCount, image, externalUrl, floorAskPrice, volume, floorSale }, ownership } = collectionData
   const stats = {
     floorPrice: floorAskPrice,
@@ -32,7 +35,8 @@ const _formatCollection = (collectionData) => {
     volume24h: volume['1day']
   }
   return {
-    id,
+    chain,
+    id, slug,
     name, description,
     imageUrl: image,
     externalUrl,
@@ -42,10 +46,10 @@ const _formatCollection = (collectionData) => {
   }
 }
 
-const _formatNFT = (nftData) => {
-  const { token: { contract, tokenId, name, description = '', image, collection }, ownership } = nftData
+const _formatNFT = (nftData, chain) => {
+  const { token: { contract, tokenId, name, description = '', image, collection, attributes=[] }, ownership } = nftData
   return {
-    chain: 'polygon',
+    chain,
     contractAddress: contract,
     tokenId,
     name,
@@ -54,27 +58,35 @@ const _formatNFT = (nftData) => {
     collection: {
       marketplaceUrl: 'https://opensea.io/',
       id: collection.id,
+      slug: collection.slug,
       name: collection.name,
       description: collection.description,
-      imageUrl: collection.imageUrl
+      imageUrl: collection.image
     },
-    traits: [],
+    traits: attributes.map(a => {
+      return {
+        trait_type: a.key,
+        value: a.value,
+        trait_count: a.tokenCount
+      }
+    }),
     marketplaceUrl: ''
   }
 }
 
+exports.getAsset = async (chain, contractAddress, tokenId) => {
+  let path = `tokens/v5?tokenSetId=token:${contractAddress}:${tokenId}&includeAttributes=true`
+  const data = await _makeRequest(path, chain)
+  if (!data || !data.tokens || !data.tokens.length) {
+    return []
+  }
+  return _formatNFT(data.tokens[0])
+}
+
 exports.getAssets = async (chain, walletAddress, collection=null, limit=200) => {
-  let baseUrl
-  if (chain === 'polygon') {
-    baseUrl = BASE_URL_POLYGON_MAINNET
-  }
-  if (!baseUrl) {
-    console.log('invalid chain found', chain)
-    return null
-  }
   let apiPath = `users/${walletAddress}/tokens/v6?limit=${limit}`
   if (collection) {
-    apiPath += `contract=${collection}`
+    apiPath += `&contract=${collection}`
   }
   const data = await _makeRequest(apiPath, chain)
   if (!data || !data.tokens || !data.tokens.length) {
@@ -82,7 +94,7 @@ exports.getAssets = async (chain, walletAddress, collection=null, limit=200) => 
   }
   const assets = []
   data.tokens.map(a => {
-    assets.push(_formatNFT(a))
+    assets.push(_formatNFT(a, chain))
   })
   return assets
 }
@@ -92,11 +104,17 @@ exports.getCollections = async (chain, walletAddress, limit=100) => {
   const data = await _makeRequest(path, chain)
   if (!data) {
     // graphQL error reporting?
-    console.log({ error: 'error getting collections data from Reservoir'})
+    return { error: 'error getting collections data from Reservoir'}
+  }
+  if (!data.collections) {
+    return { error: `error getting collections data from Reservoir: ${JSON.stringify(data)}`, statusCode: data.statusCode }
   }
   const collections = []
   data.collections.forEach(c => {
-    collections.push(_formatCollection(c))
+    const { collection: { rank = {} }} = c
+    if (rank && rank.allTime) {
+      collections.push(_formatCollection(c, chain))
+    }
   })
   return collections
 }

@@ -1,3 +1,4 @@
+const { GraphQLError } = require('graphql');
 const { ApolloServer } = require('@apollo/server')
 const { startServerAndCreateLambdaHandler } = require('@as-integrations/aws-lambda')
 const validator = require('multicoin-address-validator')
@@ -18,7 +19,9 @@ const typeDefs = `#graphql
     volume24h : String
   }
   type Collection {
+    chain: String
     id : String
+    slug: String
     name : String
     description: String
     imageUrl: String
@@ -40,6 +43,7 @@ const typeDefs = `#graphql
     description: String
     imageUrl: String
     thumbnailImageUrl: String
+    imageFormat: String
     videoUrl: String
     collection: Collection
     traits: [Trait]
@@ -72,7 +76,7 @@ const typeDefs = `#graphql
     assets(walletAddress: String!, chain: String, collectionContractAddress: String): [NFT]
   }
   type Query {
-    collections(walletAddress: String!, chain: String): [Collection]
+    collections(walletAddress: String!, chain: String, limit: Int): [Collection]
   }
   type Query {
     wallet(walletAddress: String!) : Wallet
@@ -119,10 +123,15 @@ const getAssets = async (walletAddress, chain, collectionContractAddress) => {
   }
 }
 
-const getCollections = async (walletAddress, chain) => {
+const getCollections = async (walletAddress, chain, limit) => {
   const validatedChain = validateAddress(walletAddress, chain)
   if (validatedChain) {
-    const collections = await getCollectionsHelper(validatedChain, walletAddress)
+    const collections = await getCollectionsHelper(validatedChain, walletAddress, limit)
+    if (collections.error) {
+      throw new GraphQLError(collections.error, {
+        extensions: { code: 'ERROR_GET_COLLECTIONS' },
+      })
+    }
     return collections
   }
 }
@@ -147,8 +156,8 @@ const resolvers = {
       const assets = await getAssets(walletAddress, chain, collectionContractAddress)
       return assets
     },
-    collections: async(_, {walletAddress, chain=null}) => {
-      const collections = await getCollections(walletAddress, chain)
+    collections: async(_, {walletAddress, chain=null, limit=20}) => {
+      const collections = await getCollections(walletAddress, chain, limit)
       return collections
     },
     wallet: async(_, {walletAddress, chain=null}) => {
