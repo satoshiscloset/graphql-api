@@ -144,12 +144,20 @@ const _formatBalance = (value) => {
 
 const _formatNFT = (nft) => {
   const { timestamp, fa_contract, token_id, name, decimals, description, display_uri, artifact_uri, thumbnail_uri, fa, mime, extra, attributes } = nft
-  let videoUrl
+  let videoUrl, audioUrl
   if (mime === 'video/mp4' || mime === 'video/quicktime') {
     extra.forEach(videoData => {
       if (!videoUrl) {
         if (videoData && videoData.mime_type === mime) {
           videoUrl = videoData.uri
+        }
+      }
+    })
+  } else if (mime === 'audio/mpeg') {
+    extra.forEach(data => {
+      if (!audioUrl) {
+        if (data && data.mime_type === mime) {
+          audioUrl = data.uri
         }
       }
     })
@@ -171,7 +179,9 @@ const _formatNFT = (nft) => {
     description: description,
     imageUrl: display_uri || artifact_uri,
     thumbnailImageUrl: thumbnail_uri,
+    imageFormat: (videoUrl || audioUrl) ? null : mime,
     videoUrl,
+    audioUrl,
     collection: {
       marketplaceUrl: 'https://objkt.com/',
       id: fa_contract,

@@ -95,8 +95,11 @@ const validateAddress = (address, chain=null) => {
     for (let i = 0; i < VALID_CHAINS.length; i++) {
       const chain = VALID_CHAINS[i]
       let chainToValidate = _getChainToValidate(chain)
-      return validator.validate(address, chainToValidate) && chain
+      if (validator.validate(address, chainToValidate)) {
+        return chain
+      }
     }
+    return false
   } else {
     if (chain === 'near') {
       return isNear(address)

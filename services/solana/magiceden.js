@@ -12,6 +12,13 @@ exports.getAsset = async (mintAddress, includeCollection=false) => {
   return _formatNFT(data, collection)
 }
 
+exports.getAssets = async (walletAddress) => {
+  const apiUrl = `${BASE_URL}/wallets/${walletAddress}/tokens?offset=0&limit=500`
+  const res = await fetch(apiUrl)
+  const data = await res.json()
+  return data.map(d => _formatNFT(d))
+}
+
 const getCollection = async (slug) => {
   const apiUrl = `${BASE_URL}/collections/${slug}`
   const res = await fetch(apiUrl)

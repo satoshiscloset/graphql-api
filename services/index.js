@@ -77,6 +77,11 @@ exports.getAssetsHelper = async (chain, walletAddress, collectionContractAddress
       const assets = await getAssets(walletAddress, collectionContractAddress)
       return assets
     }
+    case 'sol': {
+      const { getAssets } = require('./solana/magiceden')
+      const assets = await getAssets(walletAddress)
+      return assets
+    }
   }
 }
 
