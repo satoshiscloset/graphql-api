@@ -50,13 +50,13 @@ const _formatNFT = (nft) => {
 
   let thumbnailImageUrl = image
   let imageUrl = image
-  let imageFormat
-  let videoUrl
+  let imageFormat, videoUrl, videoFormat
   media.forEach(m => {
     const { format, gateway, thumbnail, raw } = m
     if (['mp4', 'mov'].includes(format)) {
       // found video
       videoUrl = gateway
+      videoFormat = format
     } else {
       if (thumbnail) {
         thumbnailImageUrl = thumbnail
@@ -76,6 +76,7 @@ const _formatNFT = (nft) => {
     thumbnailImageUrl,
     imageFormat,
     videoUrl,
+    videoFormat,
     collection: {
       marketplaceUrl: 'https://opensea.io/',
       id: contractAddress,

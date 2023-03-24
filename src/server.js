@@ -45,6 +45,9 @@ const typeDefs = `#graphql
     thumbnailImageUrl: String
     imageFormat: String
     videoUrl: String
+    videoFormat: String
+    audioUrl: String
+    audioFormat: String
     collection: Collection
     traits: [Trait]
     tags: [String]

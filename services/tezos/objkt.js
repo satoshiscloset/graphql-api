@@ -181,7 +181,9 @@ const _formatNFT = (nft) => {
     thumbnailImageUrl: thumbnail_uri,
     imageFormat: (videoUrl || audioUrl) ? null : mime,
     videoUrl,
+    videoFormat: videoUrl && mime,
     audioUrl,
+    audioFormat: audioUrl && mime,
     collection: {
       marketplaceUrl: 'https://objkt.com/',
       id: fa_contract,
