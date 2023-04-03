@@ -29,6 +29,8 @@ exports.formatBalance = (balance, decimals, toFixed = false) => {
 
 exports.VALID_CHAINS = ['eth', 'xtz', 'sol', 'near']
 
+exports.getOrdinal = require('./btc/hiro').getOrdinal
+
 exports.getAssetHelper = async (chain, contractAddress, tokenId, includeCollection) => {
   switch(chain) {
     case 'eth': {

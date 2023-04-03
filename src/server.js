@@ -3,7 +3,7 @@ const { ApolloServer } = require('@apollo/server')
 const { startServerAndCreateLambdaHandler } = require('@as-integrations/aws-lambda')
 const validator = require('multicoin-address-validator')
 
-const { VALID_CHAINS, getAssetHelper, getAssetsHelper, getCollectionsHelper, isNear, getWalletHelper } = require('../services')
+const { VALID_CHAINS, getAssetHelper, getAssetsHelper, getCollectionsHelper, isNear, getWalletHelper, getOrdinal } = require('../services')
 
 const typeDefs = `#graphql
   type Query {
@@ -57,6 +57,21 @@ const typeDefs = `#graphql
     mintDate: String
     tokenType: String
   }
+  type Ordinal {
+    chain: String
+    id: String
+    inscriptionId: String
+    transactionId: String
+    ownerAddress: String
+    timestamp: String
+    location: String
+    output: String
+    value: String
+    satOrdinal: String
+    satRarity: String
+    contentUrl: String
+    mimeType: String
+  }
   type TokenBalance {
     name: String
     symbol: String
@@ -71,6 +86,9 @@ const typeDefs = `#graphql
   }
 
 
+  type Query {
+    ordinal(inscriptionId: String) : Ordinal
+  }
   # includeCollection - only used when querying Solana or NEAR NFTs, defaults to false
   type Query {
     asset(contractAddress: String!, tokenId: String, chain: String, includeCollection: Boolean): NFT
@@ -111,6 +129,11 @@ const validateAddress = (address, chain=null) => {
       return validator.validate(address, chainToValidate) && chain
     }
   }
+}
+
+const getOrdinalAsset = async (inscriptionId) => {
+  const asset = await getOrdinal(inscriptionId)
+  return asset
 }
 
 const getAsset = async (contractAddress, tokenId, chain, includeCollection) => {
@@ -154,6 +177,10 @@ const getWalletAssets = async (walletAddress, chain) => {
 const resolvers = {
   Query: {
     ping: () => 'pong',
+    ordinal: async(_, {inscriptionId}) => {
+      const asset = await getOrdinalAsset(inscriptionId)
+      return asset
+    },
     asset: async (_, {contractAddress, tokenId, chain=null, includeCollection=false}) => {
       const asset = await getAsset(contractAddress, tokenId, chain, includeCollection)
       return asset
