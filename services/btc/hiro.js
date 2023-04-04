@@ -1,4 +1,4 @@
-const { fetch } = require('../index.js')
+const { fetch, formatDate } = require('../index.js')
 
 const _formatOrdinal = (data) => {
   const {
@@ -26,17 +26,19 @@ const _formatOrdinal = (data) => {
     value,
     satOrdinal:     sat_ordinal,
     satRarity:      sat_rarity,
-    contentUrl:     `https://ordinals.com/content/${id}`,
+    contentUrl:     `https://api.hiro.so/ordinals/v1/inscriptions/${number}/content`,
     mimeType:       mime_type,
+    mintDate:       formatDate(timestamp)
   }
 }
 
 exports.getOrdinal = async (inscriptionId) => {
-  const url = `https://api.hiro.so/ordinals/v1/inscriptions?from_number=${inscriptionId}&to_number=${inscriptionId}&limit=1&order=asc`
+  const url = `https://api.hiro.so/ordinals/v1/inscriptions/${inscriptionId}`
   const res = await fetch(url)
   const data = await res.json()
-  const { results } = data
-  if (results && results.length) {
-    return _formatOrdinal(results[0])
+  if (data.error) {
+    return data
   }
+  const { results } = data
+  return _formatOrdinal(data)
 }

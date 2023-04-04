@@ -63,7 +63,6 @@ const typeDefs = `#graphql
     inscriptionId: String
     transactionId: String
     ownerAddress: String
-    timestamp: String
     location: String
     output: String
     value: String
@@ -71,6 +70,7 @@ const typeDefs = `#graphql
     satRarity: String
     contentUrl: String
     mimeType: String
+    mintDate: String
   }
   type TokenBalance {
     name: String
@@ -133,6 +133,11 @@ const validateAddress = (address, chain=null) => {
 
 const getOrdinalAsset = async (inscriptionId) => {
   const asset = await getOrdinal(inscriptionId)
+  if (asset.error) {
+    throw new GraphQLError(asset.error, {
+      extensions: { code: 'ERROR_GET_ASSET' },
+    })
+  }
   return asset
 }
 
