@@ -27,7 +27,7 @@ exports.formatBalance = (balance, decimals, toFixed = false) => {
   return +parseFloat(formattedBalance)
 }
 
-exports.VALID_CHAINS = ['eth', 'xtz', 'sol', 'near']
+exports.VALID_CHAINS = ['btc', 'eth', 'xtz', 'sol', 'near']
 
 exports.getOrdinal = require('./btc/hiro').getOrdinal
 
@@ -63,14 +63,19 @@ exports.getAssetHelper = async (chain, contractAddress, tokenId, includeCollecti
 
 exports.getAssetsHelper = async (chain, walletAddress, collectionContractAddress) => {
   switch(chain) {
+    case 'btc': {
+      const { getAssets } = require('./btc/hiro')
+      const assets = await getAssets(walletAddress)
+      return assets
+    }
     case 'eth': {
       const { getAssets } = require('./ethereum/alchemy')
       const assets = await getAssets(chain, walletAddress, collectionContractAddress)
       return assets
     }
     case 'polygon': {
-      // const { getAssets } = require('./reservoir')
-      const { getAssets } = require('./ethereum/alchemy')
+      const { getAssets } = require('./reservoir')
+      // const { getAssets } = require('./ethereum/alchemy')
       const assets = await getAssets(chain, walletAddress, collectionContractAddress)
       return assets
     }

@@ -48,6 +48,8 @@ const typeDefs = `#graphql
     videoFormat: String
     audioUrl: String
     audioFormat: String
+    mediaUrl: String
+    mimeType: String
     collection: Collection
     traits: [Trait]
     tags: [String]
@@ -56,21 +58,6 @@ const typeDefs = `#graphql
     marketplaceUrl: String
     mintDate: String
     tokenType: String
-  }
-  type Ordinal {
-    chain: String
-    id: String
-    inscriptionId: String
-    transactionId: String
-    ownerAddress: String
-    location: String
-    output: String
-    value: String
-    satOrdinal: String
-    satRarity: String
-    contentUrl: String
-    mimeType: String
-    mintDate: String
   }
   type TokenBalance {
     name: String
@@ -87,7 +74,7 @@ const typeDefs = `#graphql
 
 
   type Query {
-    ordinal(inscriptionId: String) : Ordinal
+    ordinal(inscriptionId: String) : NFT
   }
   # includeCollection - only used when querying Solana or NEAR NFTs, defaults to false
   type Query {

@@ -47,7 +47,7 @@ const _formatCollection = (collectionData, chain) => {
 }
 
 const _formatNFT = (nftData, chain) => {
-  const { token: { contract, tokenId, name, description = '', image, collection, attributes=[] }, ownership } = nftData
+  const { token: { contract, tokenId, name, description = '', image, media, collection, attributes=[] }, ownership } = nftData
   return {
     chain,
     contractAddress: contract,
@@ -55,6 +55,7 @@ const _formatNFT = (nftData, chain) => {
     name,
     description,
     imageUrl: image,
+    mediaUrl: media,
     collection: {
       marketplaceUrl: 'https://opensea.io/',
       id: collection.id,
@@ -75,7 +76,7 @@ const _formatNFT = (nftData, chain) => {
 }
 
 exports.getAsset = async (chain, contractAddress, tokenId) => {
-  let path = `tokens/v5?tokenSetId=token:${contractAddress}:${tokenId}&includeAttributes=true`
+  const path = `tokens/v6?tokenSetId=token:${contractAddress}:${tokenId}&includeAttributes=true`
   const data = await _makeRequest(path, chain)
   if (!data || !data.tokens || !data.tokens.length) {
     return []
@@ -83,18 +84,18 @@ exports.getAsset = async (chain, contractAddress, tokenId) => {
   return _formatNFT(data.tokens[0])
 }
 
-exports.getAssets = async (chain, walletAddress, collection=null, limit=200) => {
-  let apiPath = `users/${walletAddress}/tokens/v6?limit=${limit}`
-  if (collection) {
-    apiPath += `&contract=${collection}`
+exports.getAssets = async (chain, walletAddress, collectionContractAddress=null, offset=0, limit=200) => {
+  let path = `users/${walletAddress}/tokens/v7?includeAttributes=true&limit=${limit}&useNonFlaggedFloorAsk=true`
+  if (collectionContractAddress) {
+    path += `&collection=${collectionContractAddress}`
   }
-  const data = await _makeRequest(apiPath, chain)
+  const data = await _makeRequest(path, chain)
   if (!data || !data.tokens || !data.tokens.length) {
     return []
   }
   const assets = []
-  data.tokens.map(a => {
-    assets.push(_formatNFT(a, chain))
+  data.tokens.forEach(t => {
+    assets.push(_formatNFT(t, chain))
   })
   return assets
 }
