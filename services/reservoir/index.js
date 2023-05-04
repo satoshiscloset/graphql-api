@@ -112,10 +112,7 @@ exports.getCollections = async (chain, walletAddress, limit=100) => {
   }
   const collections = []
   data.collections.forEach(c => {
-    const { collection: { rank = {} }} = c
-    if (rank && rank.allTime) {
-      collections.push(_formatCollection(c, chain))
-    }
+    collections.push(_formatCollection(c, chain))
   })
   return collections
 }
