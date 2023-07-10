@@ -26,7 +26,7 @@ const _makeRequest = async (path, chain) => {
 }
 
 const _formatCollection = (collectionData, chain) => {
-  const { collection: { id, slug, name, description, tokenCount, image, externalUrl, floorAskPrice, volume, floorSale }, ownership } = collectionData
+  const { collection: { id, slug, name, description, tokenCount, image, externalUrl, floorAskPrice, volume, floorSale, rank = {} }, ownership } = collectionData
   const stats = {
     floorPrice: floorAskPrice,
     // numOwners,
@@ -42,7 +42,8 @@ const _formatCollection = (collectionData, chain) => {
     externalUrl,
     marketplaceUrl: `https://opensea.io/collection/${slug}`,
     stats,
-    numOwned: ownership.tokenCount
+    numOwned: ownership.tokenCount,
+    rank: rank && rank.allTime
   }
 }
 

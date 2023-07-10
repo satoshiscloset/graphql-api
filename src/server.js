@@ -29,6 +29,7 @@ const typeDefs = `#graphql
     marketplaceUrl : String
     stats: Stats,
     numOwned: Int
+    rank: Int
   }
   type Trait {
     trait_type : String
