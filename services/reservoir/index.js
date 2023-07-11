@@ -101,8 +101,8 @@ exports.getAssets = async (chain, walletAddress, collectionContractAddress=null,
   return assets
 }
 
-exports.getCollections = async (chain, walletAddress, limit=100) => {
-  let path = `users/${walletAddress}/collections/v3?limit=${limit}`
+exports.getCollections = async (chain, walletAddress, limit=100, offset=0) => {
+  let path = `users/${walletAddress}/collections/v3?limit=${limit}&offset=${offset}`
   const data = await _makeRequest(path, chain)
   if (!data) {
     // graphQL error reporting?

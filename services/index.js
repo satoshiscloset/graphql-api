@@ -92,12 +92,12 @@ exports.getAssetsHelper = async (chain, walletAddress, collectionContractAddress
   }
 }
 
-exports.getCollectionsHelper = async (chain, walletAddress, limit) => {
+exports.getCollectionsHelper = async (chain, walletAddress, limit, offset) => {
   switch (chain) {
     case 'eth':
     case 'polygon': {
       const { getCollections } = require('./reservoir')
-      const collections = await getCollections(chain, walletAddress, limit)
+      const collections = await getCollections(chain, walletAddress, limit, offset)
       return collections
     }
   }

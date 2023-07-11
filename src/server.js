@@ -85,7 +85,7 @@ const typeDefs = `#graphql
     assets(walletAddress: String!, chain: String, collectionContractAddress: String): [NFT]
   }
   type Query {
-    collections(walletAddress: String!, chain: String, limit: Int): [Collection]
+    collections(walletAddress: String!, chain: String, limit: Int, offset: Int): [Collection]
   }
   type Query {
     wallet(walletAddress: String!) : Wallet
@@ -145,10 +145,10 @@ const getAssets = async (walletAddress, chain, collectionContractAddress) => {
   }
 }
 
-const getCollections = async (walletAddress, chain, limit) => {
+const getCollections = async (walletAddress, chain, limit, offset) => {
   const validatedChain = validateAddress(walletAddress, chain)
   if (validatedChain) {
-    const collections = await getCollectionsHelper(validatedChain, walletAddress, limit)
+    const collections = await getCollectionsHelper(validatedChain, walletAddress, limit, offset)
     if (collections.error) {
       throw new GraphQLError(collections.error, {
         extensions: { code: 'ERROR_GET_COLLECTIONS' },
@@ -182,8 +182,8 @@ const resolvers = {
       const assets = await getAssets(walletAddress, chain, collectionContractAddress)
       return assets
     },
-    collections: async(_, {walletAddress, chain=null, limit=20}) => {
-      const collections = await getCollections(walletAddress, chain, limit)
+    collections: async(_, {walletAddress, chain=null, limit=20, offset=0}) => {
+      const collections = await getCollections(walletAddress, chain, limit, offset)
       return collections
     },
     wallet: async(_, {walletAddress, chain=null}) => {
