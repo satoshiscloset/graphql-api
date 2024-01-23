@@ -1,6 +1,7 @@
 const { GraphQLError } = require('graphql');
 const { ApolloServer } = require('@apollo/server')
 const { startServerAndCreateLambdaHandler } = require('@as-integrations/aws-lambda')
+const { startStandaloneServer } = require('@apollo/server/standalone')
 const validator = require('multicoin-address-validator')
 
 const { VALID_CHAINS, getAssetHelper, getAssetsHelper, getCollectionsHelper, isNear, getWalletHelper, getOrdinal } = require('../services')
@@ -94,27 +95,54 @@ const typeDefs = `#graphql
 
 const _getChainToValidate = (chain) => {
   if (chain === 'polygon') {
-    return chainToValidate = 'matic' // validator needs polygon's old name
+    return 'matic' // validator needs polygon's old name
   }
   return chain
 }
 
+const _isNameService = (address) => {
+  return false
+  const isEth = (address) => {
+    return address.length && address.endsWith('.eth')
+  }
+
+  const isSol = (address) => {
+    return address.length && address.endsWith('.sol')
+  }
+
+  const isTez = (address) => {
+    return address.length && address.endsWith('.tez')
+  }
+
+  if (isEth(address)) {
+    // Perform reverse lookup to get address
+  } else if (isSol(address)) {
+    // Perform reverse lookup to get address
+  } else if (isTez(address)) {
+    // Perform reverse lookup to get address
+  }
+}
+
 const validateAddress = (address, chain=null) => {
-  if (chain === null) {
-    for (let i = 0; i < VALID_CHAINS.length; i++) {
-      const chain = VALID_CHAINS[i]
-      let chainToValidate = _getChainToValidate(chain)
-      if (validator.validate(address, chainToValidate)) {
-        return chain
-      }
-    }
-    return false
+  if (_isNameService(address)) {
+    // TODO
   } else {
-    if (chain === 'near') {
-      return isNear(address)
+    if (chain === null) {
+      for (let i = 0; i < VALID_CHAINS.length; i++) {
+        const chain = VALID_CHAINS[i]
+        let chainToValidate = _getChainToValidate(chain)
+        if (validator.validate(address, chainToValidate)) {
+          return chain
+        }
+      }
+      return false
     } else {
-      let chainToValidate = _getChainToValidate(chain)
-      return validator.validate(address, chainToValidate) && chain
+      if (chain === 'near') {
+        return isNear(address)
+      } else {
+        let chainToValidate = _getChainToValidate(chain)
+        return validator.validate(address, chainToValidate) && chain
+      }
     }
   }
 }
@@ -198,5 +226,13 @@ const server = new ApolloServer({
   typeDefs,
   resolvers,
 });
-
 exports.graphqlHandler = startServerAndCreateLambdaHandler(server);
+// to run locally, comment above line out, and uncomment below. then run `node src/server.js`:
+// async function startApolloServer() {
+//   const { url } = await startStandaloneServer(server);
+//   console.log(`
+//     🚀  Server is running!
+//     📭  Query at ${url}
+//   `);
+// }
+// startApolloServer()

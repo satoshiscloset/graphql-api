@@ -69,7 +69,7 @@ exports.getAssetsHelper = async (chain, walletAddress, collectionContractAddress
       return assets
     }
     case 'eth': {
-      const { getAssets } = require('./ethereum/alchemy')
+      const { getAssets } = require('./reservoir')
       const assets = await getAssets(chain, walletAddress, collectionContractAddress)
       return assets
     }

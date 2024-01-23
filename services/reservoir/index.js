@@ -28,7 +28,7 @@ const _makeRequest = async (path, chain) => {
 const _formatCollection = (collectionData, chain) => {
   const { collection: { id, slug, name, description, tokenCount, image, externalUrl, floorAskPrice, volume, floorSale, rank = {} }, ownership } = collectionData
   const stats = {
-    floorPrice: floorAskPrice,
+    floorPrice: floorAskPrice?.amount?.native,
     // numOwners,
     totalSupply: tokenCount,
     volumeTotal: volume.allTime,
@@ -63,7 +63,10 @@ const _formatNFT = (nftData, chain) => {
       slug: collection.slug,
       name: collection.name,
       description: collection.description,
-      imageUrl: collection.image
+      imageUrl: collection.image,
+      stats: {
+        floorPrice: collection.floorAskPrice?.amount?.native
+      }
     },
     traits: attributes.map(a => {
       return {
@@ -86,7 +89,7 @@ exports.getAsset = async (chain, contractAddress, tokenId) => {
 }
 
 exports.getAssets = async (chain, walletAddress, collectionContractAddress=null, offset=0, limit=200) => {
-  let path = `users/${walletAddress}/tokens/v7?includeAttributes=true&limit=${limit}&useNonFlaggedFloorAsk=true`
+  let path = `users/${walletAddress}/tokens/v9?includeAttributes=true&limit=${limit}&useNonFlaggedFloorAsk=true&excludeSpam=true`
   if (collectionContractAddress) {
     path += `&collection=${collectionContractAddress}`
   }
@@ -102,7 +105,7 @@ exports.getAssets = async (chain, walletAddress, collectionContractAddress=null,
 }
 
 exports.getCollections = async (chain, walletAddress, limit=100, offset=0) => {
-  let path = `users/${walletAddress}/collections/v3?limit=${limit}&offset=${offset}`
+  let path = `users/${walletAddress}/collections/v3?limit=${limit}&excludeSpam=true`
   const data = await _makeRequest(path, chain)
   if (!data) {
     // graphQL error reporting?

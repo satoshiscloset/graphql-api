@@ -1,7 +1,7 @@
 const { fetch, isVideo } = require('../index.js')
 
 const BASE_URL_ETH_MAINNET = `https://eth-mainnet.g.alchemy.com/v2/${process.env.ALCHEMY_ETH_API_KEY}`
-const BASE_URL_POLYGON_MAINNET = `https://polygon-mainnet.g.alchemy.com/v2/Ws6prnBBzLLLayjB1QXx2wFOO5Ct_bXE`
+const BASE_URL_POLYGON_MAINNET = `https://polygon-mainnet.g.alchemy.com/v2/${process.env.ALCHEMY_POLYGON_API_KEY}`
 
 const _makeRequest = async (path, chain) => {
   let baseUrl = BASE_URL_ETH_MAINNET

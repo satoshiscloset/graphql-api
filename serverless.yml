@@ -17,4 +17,4 @@ functions:
       - httpApi:
           path: /
           method: GET
-    timeout: 30
+    timeout: 60
